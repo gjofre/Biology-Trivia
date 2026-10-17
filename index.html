@@ -1,0 +1,406 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Biology Trivia</title>
+<!-- Pool: 27 biology + 8 sports questions -->
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: one specimen card centered on an agar-plate ground; one student, one question per turn */
+:root{
+  --bg:#eef2ee;
+  --card:#ffffff;
+  --ink:#16302b;
+  --muted:#5b6f69;
+  --line:#d3ddd8;
+  --accent:#0f7a63;
+  --accent-soft:#dcefe8;
+  --agar:#d9a441;
+  --good:#1d7f4e;
+  --good-bg:#e1f3e8;
+  --bad:#b23a3a;
+  --bad-bg:#f8e3e1;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e1816; --card:#15221f; --ink:#e3ece8; --muted:#97aba4; --line:#2a3b37;
+    --accent:#4fc6a6; --accent-soft:#1d3a33; --agar:#e3b65c;
+    --good:#5fd394; --good-bg:#183a29; --bad:#f08a84; --bad-bg:#3d1f1e;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e1816; --card:#15221f; --ink:#e3ece8; --muted:#97aba4; --line:#2a3b37;
+  --accent:#4fc6a6; --accent-soft:#1d3a33; --agar:#e3b65c;
+  --good:#5fd394; --good-bg:#183a29; --bad:#f08a84; --bad-bg:#3d1f1e;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  background:var(--bg); color:var(--ink); font-family:var(--body); font-size:16px; line-height:1.5;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));
+  padding-right:max(16px, env(safe-area-inset-right, 0px));
+  padding-block:32px 48px;
+  background-image:radial-gradient(circle at 85% 10%, var(--accent-soft) 0, transparent 40%);
+}
+.wrap{max-width:720px; min-height:100%; margin:0 auto; display:flex; flex-direction:column; justify-content:center; gap:16px}
+.eyebrow{font-family:var(--mono); font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--accent)}
+
+.card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:32px; box-shadow:0 1px 0 var(--line), 0 18px 40px -28px rgba(15,60,50,.35)}
+
+/* Intro slide */
+.intro{display:flex; flex-direction:column; align-items:center; text-align:center; padding-block:56px}
+.intro h1{font-family:var(--display); font-weight:800; font-size:clamp(2.2rem, 7vw, 3.6rem); line-height:1.02; margin:12px 0 22px; letter-spacing:-.025em; text-wrap:balance}
+.intro h1 em{font-style:normal; color:var(--accent)}
+.intro h1{margin-bottom:6px}
+.intro .sub{font-family:var(--display); font-weight:700; font-size:clamp(1.2rem, 3.6vw, 1.6rem); color:var(--agar); margin:0 0 24px; letter-spacing:-.01em}
+.intro .rule{font-size:1.05rem; color:var(--muted); margin:0 0 6px; display:flex; align-items:center; gap:10px; justify-content:center; flex-wrap:wrap}
+.intro .rule b{font-family:var(--mono); color:var(--ink); background:var(--accent-soft); padding:2px 10px; border-radius:6px; font-weight:600}
+.intro .ask{font-family:var(--display); font-weight:700; font-size:1.35rem; margin:30px 0 18px}
+
+/* Question slide */
+.qhead{display:flex; justify-content:space-between; align-items:center; gap:16px}
+.tag{font-family:var(--mono); font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--agar); font-weight:600}
+.timer{position:relative; width:64px; height:64px; flex:none}
+.timer svg{width:64px; height:64px; transform:rotate(-90deg)}
+.timer circle{fill:none; stroke-width:5}
+.timer .track{stroke:var(--line)}
+.timer .ring{stroke:var(--accent); stroke-linecap:round; transition:stroke .2s}
+.timer.low .ring{stroke:var(--bad)}
+.timer .num{position:absolute; inset:0; display:grid; place-items:center; font-family:var(--mono); font-weight:600; font-size:20px; font-variant-numeric:tabular-nums}
+.timer.low .num{color:var(--bad)}
+
+.question{font-family:var(--display); font-weight:700; font-size:clamp(1.3rem, 3.8vw, 1.7rem); line-height:1.25; margin:20px 0 22px; text-wrap:balance}
+.options{display:grid; gap:10px}
+.opt{
+  display:flex; align-items:center; gap:14px; width:100%; text-align:left;
+  font:inherit; color:var(--ink); background:var(--card);
+  border:1.5px solid var(--line); border-radius:10px; padding:14px 16px; cursor:pointer;
+  transition:border-color .15s, background .15s, transform .1s;
+}
+.opt:hover:not(:disabled){border-color:var(--accent); background:var(--accent-soft)}
+.opt:active:not(:disabled){transform:scale(.995)}
+.opt:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+.opt:disabled{cursor:default}
+.opt .key{flex:none; width:28px; height:28px; border-radius:7px; display:grid; place-items:center; font-family:var(--mono); font-size:13px; font-weight:600; background:var(--accent-soft); color:var(--accent)}
+.opt .txt{min-width:0}
+.opt.picked-good{border-color:var(--good); background:var(--good-bg)}
+.opt.picked-bad{border-color:var(--bad); background:var(--bad-bg)}
+.opt.dim{opacity:.55}
+
+.verdict{margin-top:22px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; min-height:52px}
+.badge{font-family:var(--display); font-weight:800; font-size:1.8rem; letter-spacing:-.01em; line-height:1.1}
+.badge.good{color:var(--good)}
+.badge.bad{color:var(--bad)}
+.badge small{display:block; font-family:var(--body); font-weight:500; font-size:13px; color:var(--muted); letter-spacing:0}
+
+.btn{font:600 16px var(--body); padding:14px 26px; border-radius:10px; border:0; background:var(--accent); color:var(--card); cursor:pointer}
+.btn:hover{filter:brightness(1.08)}
+.btn:focus-visible{outline:3px solid var(--agar); outline-offset:2px}
+.btn.big{font-size:18px; padding:16px 32px}
+
+.hint{font-size:13px; color:var(--muted); margin:0}
+.foot{display:flex; justify-content:center; align-items:center; gap:16px; flex-wrap:wrap}
+.sound{font:500 13px var(--mono); color:var(--muted); background:transparent; border:1px solid var(--line); border-radius:999px; padding:6px 14px; cursor:pointer}
+.sound:hover{color:var(--accent); border-color:var(--accent)}
+.sound:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+.sound[aria-pressed="false"]{opacity:.7}
+
+@media (max-width:480px){ .card{padding:22px} .intro{padding-block:40px} }
+@media (prefers-reduced-motion: reduce){ *{transition:none!important} }
+</style>
+
+<div class="wrap">
+  <!-- Intro slide -->
+  <section class="card intro" id="introScreen">
+    <div class="eyebrow">Biology Trivia</div>
+    <h1>Test your <em>Biology</em> knowledge…</h1>
+    <p class="sub">with some sports trivia</p>
+    <p class="rule">You will have <b>30 seconds</b> once the question appears.</p>
+    <p class="ask">Ready to see your question?</p>
+    <button class="btn big" id="showBtn">Show my question</button>
+  </section>
+
+  <!-- Question slide -->
+  <section class="card" id="quizScreen" hidden>
+    <div class="qhead">
+      <div class="tag" id="qtopic"></div>
+      <div class="timer" id="timer">
+        <svg viewBox="0 0 64 64" aria-hidden="true">
+          <circle class="track" cx="32" cy="32" r="28"></circle>
+          <circle class="ring" id="ring" cx="32" cy="32" r="28"></circle>
+        </svg>
+        <div class="num" id="secs">30</div>
+      </div>
+    </div>
+    <h2 class="question" id="qtext"></h2>
+    <div class="options" id="options"></div>
+    <div class="verdict">
+      <div class="badge" id="verdict" role="status" aria-live="polite"></div>
+      <button class="btn" id="nextBtn" hidden>Next student</button>
+    </div>
+  </section>
+
+  <div class="foot">
+    <p class="hint">Keyboard: Enter to show the question, 1–4 to answer.</p>
+    <button class="sound" id="musicBtn" aria-pressed="true">Music: on</button>
+    <button class="sound" id="soundBtn" aria-pressed="true">Sound: on</button>
+  </div>
+</div>
+
+<script>
+const POOL = [
+  {t:"Molecular genetics", q:"Which enzyme relieves the torsional strain (supercoiling) that builds up ahead of a DNA replication fork?", a:"Topoisomerase", w:["Helicase","Primase","DNA ligase"]},
+  {t:"Molecular genetics", q:"Okazaki fragments are formed during replication of which strand?", a:"The lagging strand", w:["The leading strand","The template strand only during transcription","Both strands equally"]},
+  {t:"Molecular genetics", q:"How many of the 64 codons in the standard genetic code are stop codons?", a:"3", w:["1","4","61"]},
+  {t:"Molecular genetics", q:"During translation, which ribosomal site holds the tRNA carrying the growing polypeptide chain?", a:"P site", w:["A site","E site","Termination factor"]},
+  {t:"Molecular genetics", q:"In E. coli, the lac operon is transcribed at its highest level when:", a:"Lactose is present and glucose is absent", w:["Glucose is present and lactose is absent","Both glucose and lactose are present","Both glucose and lactose are absent"]},
+  {t:"Molecular genetics", q:"Why does a G–C base pair contribute more to DNA duplex stability than an A–T pair?", a:"It forms three hydrogen bonds instead of two", w:["It forms covalent bonds across the helix","Guanine and cytosine are both purines","It forms two hydrogen bonds instead of one"]},
+  {t:"Biotechnology", q:"Why is Taq polymerase used in PCR?", a:"It remains active through repeated high-temperature denaturation steps", w:["It does not require a primer to begin synthesis","It synthesizes DNA in the 3′ to 5′ direction","It has the highest proofreading accuracy of any polymerase"]},
+  {t:"Biotechnology", q:"In CRISPR-Cas9 genome editing, what determines where Cas9 cuts the DNA?", a:"A guide RNA complementary to the target sequence", w:["A restriction site palindrome","A zinc-finger DNA-binding domain","The nearest promoter sequence"]},
+  {t:"Genetics", q:"A cross between two heterozygotes (Aa × Aa) with complete dominance gives which phenotypic ratio?", a:"3 dominant : 1 recessive", w:["1 : 2 : 1","1 : 1","9 : 3 : 3 : 1"]},
+  {t:"Genetics", q:"A test cross AaBb × aabb, with the genes unlinked, gives which phenotypic ratio?", a:"1 : 1 : 1 : 1", w:["9 : 3 : 3 : 1","3 : 1","1 : 2 : 1"]},
+  {t:"Genetics", q:"In a population at Hardy–Weinberg equilibrium, 16% of individuals show a recessive phenotype. What is the frequency of the recessive allele?", a:"0.4", w:["0.16","0.2","0.5"]},
+  {t:"Genetics", q:"A woman who carries an autosomal recessive allele has children with a man who does not carry the allele. What fraction of their sons are expected to be affected?", a:"None of them", w:["1/2","All of them","1/4"]},
+  {t:"Cell biology", q:"During which phase of meiosis do homologous chromosomes separate?", a:"Anaphase I", w:["Anaphase II","Metaphase I","Prophase I"]},
+  {t:"Cell biology", q:"A protein destined for secretion from the cell is first synthesized on:", a:"Ribosomes bound to the rough endoplasmic reticulum", w:["The nucleolus region inside the nucleus","The smooth endoplasmic reticulum","Vesicles formed by the Golgi apparatus"]},
+  {t:"Cell biology", q:"For each cycle of ATP hydrolysis, the Na⁺/K⁺ pump moves:", a:"3 Na⁺ out and 2 K⁺ in", w:["2 Na⁺ out and 3 K⁺ in","3 Na⁺ in and 2 K⁺ out","1 Na⁺ out and 1 K⁺ in"]},
+  {t:"Cell biology", q:"What is the main role of p53 when a cell's DNA is damaged?", a:"It arrests the cell cycle and can trigger apoptosis", w:["It speeds entry into S phase to replace damaged DNA","It acts as a growth factor receptor","It degrades the damaged chromosome directly"]},
+  {t:"Cell biology", q:"Which observation is strong evidence for the endosymbiotic origin of mitochondria?", a:"They have their own circular DNA and 70S-type ribosomes", w:["They are surrounded by a single membrane","They are produced by the endoplasmic reticulum","They contain histone-wrapped linear chromosomes like the nucleus"]},
+  {t:"Biochemistry", q:"What is the net ATP yield of glycolysis per molecule of glucose?", a:"2 ATP", w:["4 ATP","36 ATP","0 ATP"]},
+  {t:"Biochemistry", q:"What is the final electron acceptor of the electron transport chain in aerobic respiration?", a:"O₂", w:["NAD⁺","CO₂","FADH₂"]},
+  {t:"Biochemistry", q:"Which enzyme fixes CO₂ in the first step of the Calvin cycle?", a:"RuBisCO", w:["ATP synthase","PEP carboxylase in all plants","Phosphofructokinase"]},
+  {t:"Biochemistry", q:"A reaction proceeds spontaneously under given conditions when:", a:"ΔG is negative", w:["ΔG is positive","ΔH is positive","Activation energy is zero"]},
+  {t:"Biochemistry", q:"The primary structure of a protein is defined by:", a:"Its sequence of amino acids joined by peptide bonds", w:["Hydrogen bonds forming α-helices and β-sheets","Interactions between multiple subunits","Disulfide bridges between distant regions"]},
+  {t:"Physiology", q:"Which hormone, released by pancreatic β-cells, lowers blood glucose?", a:"Insulin", w:["Glucagon","Cortisol","Epinephrine"]},
+  {t:"Plant biology", q:"Water moves from the soil toward the plant root cells. Water is moving:", a:"From a hypotonic solution to a hypertonic solution", w:["From a hypertonic solution to a hypotonic solution","Between isotonic solutions","By active transport through aquaporins"]},
+  {t:"Evolution", q:"The founder effect is a form of:", a:"Genetic drift", w:["Natural selection","Gene flow","Mutation pressure"]},
+  {t:"Evolution", q:"In cladistics, a shared derived character used to define a clade is called a:", a:"Synapomorphy", w:["Symplesiomorphy","Homoplasy","Autapomorphy"]},
+  {t:"Evolution", q:"Allopatric speciation begins with:", a:"Geographic separation of populations", w:["Polyploidy within a single population","Sexual selection in the same habitat","Hybridization between two species"]},
+  {t:"Sports", q:"In Formula 1, which driver leads the 2026 Drivers' Championship heading into the final races of the season?", a:"Kimi Antonelli", w:["Max Verstappen","Lewis Hamilton","Lando Norris"]},
+  {t:"Sports", q:"Mexico opened the 2026 FIFA World Cup at Estadio Azteca with a match against which country?", a:"South Africa", w:["South Korea","Canada","Japan"]},
+  {t:"Sports", q:"Which country won the 2026 FIFA World Cup?", a:"Spain", w:["Argentina","France","Brazil"]},
+  {t:"Sports", q:"How many national teams played in the 2026 FIFA World Cup, the first hosted by three countries?", a:"48", w:["32","40","64"]},
+  {t:"Sports", q:"Which team won Super Bowl LX in February 2026?", a:"Seattle Seahawks", w:["New England Patriots","Kansas City Chiefs","Philadelphia Eagles"]},
+  {t:"Sports", q:"Which team won the 2026 NBA Finals?", a:"New York Knicks", w:["San Antonio Spurs","Oklahoma City Thunder","Boston Celtics"]},
+  {t:"Sports", q:"Where were the 2026 Winter Olympics held?", a:"Milan–Cortina, Italy", w:["Salt Lake City, USA","Sapporo, Japan","Chamonix, France"]},
+  {t:"Sports", q:"Who won the men's singles title at Wimbledon 2026?", a:"Jannik Sinner", w:["Carlos Alcaraz","Novak Djokovic","Alexander Zverev"]},
+];
+
+const SECONDS = 30;
+
+// ---- Sounds (generated in the browser, no audio files needed) ----
+let actx = null, soundOn = true;
+function audio(){
+  try{
+    if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+    if (actx.state === "suspended") actx.resume();
+  }catch(e){ actx = null; }
+  return actx;
+}
+function tone(freq, start, dur, type, vol, slideTo){
+  const ctx = audio(); if (!ctx) return;
+  const t = ctx.currentTime + start;
+  const o = ctx.createOscillator(), g = ctx.createGain();
+  o.type = type; o.frequency.setValueAtTime(freq, t);
+  if (slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, t + dur);
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(vol, t + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g); g.connect(ctx.destination);
+  o.start(t); o.stop(t + dur + 0.05);
+}
+function playCorrect(){
+  if (!soundOn) return;
+  // bright rising chime: C5, E5, G5, C6
+  [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, i * 0.09, 0.35, "triangle", 0.25));
+}
+function playIncorrect(){
+  if (!soundOn) return;
+  // low two-step buzzer
+  tone(196, 0, 0.28, "sawtooth", 0.18, 180);
+  tone(147, 0.3, 0.45, "sawtooth", 0.18, 120);
+}
+
+// ---- Background music: a bouncy game-show loop that speeds up during the question ----
+const BASE_BPM = 112, MAX_BPM = 240;
+let musicOn = true, musicPlaying = false, musicGain = null, musicTimer = 0;
+let bpm = BASE_BPM, step = 0, nextTime = 0, noiseBuf = null;
+// 32 eighth notes of melody (MIDI numbers, 0 = rest) and 16 quarter-note bass notes
+const MEL = [72,76,79,76, 77,81,79,76,  74,77,76,72, 74,71,67,0,
+             72,76,79,84, 83,79,81,77,  76,79,74,71, 72,0,72,0];
+const BASS = [48,55,48,55, 53,60,48,55, 48,55,48,55, 43,50,48,48];
+const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
+
+function mNote(ctx, freq, t, dur, type, vol){
+  const o = ctx.createOscillator(), g = ctx.createGain();
+  o.type = type; o.frequency.setValueAtTime(freq, t);
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(vol, t + 0.01);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g); g.connect(musicGain);
+  o.start(t); o.stop(t + dur + 0.02);
+}
+function mHat(ctx, t){
+  if (!noiseBuf){
+    noiseBuf = ctx.createBuffer(1, ctx.sampleRate * 0.05, ctx.sampleRate);
+    const d = noiseBuf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  }
+  const s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+  s.buffer = noiseBuf; f.type = "highpass"; f.frequency.value = 6000;
+  g.gain.setValueAtTime(0.12, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.04);
+  s.connect(f); f.connect(g); g.connect(musicGain);
+  s.start(t); s.stop(t + 0.05);
+}
+function scheduler(){
+  const ctx = actx; if (!ctx) return;
+  while (nextTime < ctx.currentTime + 0.12){
+    const s = step % 32, len = 60 / bpm / 2;
+    if (MEL[s]) mNote(ctx, mtof(MEL[s]), nextTime, len * 0.85, "square", 0.07);
+    if (s % 2 === 0) mNote(ctx, mtof(BASS[s / 2]), nextTime, len * 1.6, "triangle", 0.25);
+    else mHat(ctx, nextTime);
+    nextTime += len; step++;
+  }
+}
+function startMusic(){
+  if (!musicOn) return;
+  const ctx = audio(); if (!ctx) return;
+  if (!musicGain){ musicGain = ctx.createGain(); musicGain.connect(ctx.destination); }
+  const t = ctx.currentTime;
+  musicGain.gain.cancelScheduledValues(t);
+  musicGain.gain.setValueAtTime(0.5, t);
+  bpm = BASE_BPM;
+  if (musicPlaying) return;
+  musicPlaying = true; step = 0; nextTime = t + 0.05;
+  clearInterval(musicTimer);
+  musicTimer = setInterval(scheduler, 25);
+}
+function stopMusic(){
+  if (!musicPlaying) return;
+  musicPlaying = false; clearInterval(musicTimer);
+  if (actx && musicGain){
+    const t = actx.currentTime;
+    musicGain.gain.cancelScheduledValues(t);
+    musicGain.gain.setValueAtTime(musicGain.gain.value, t);
+    musicGain.gain.linearRampToValueAtTime(0.0001, t + 0.15);
+  }
+}
+// Browsers allow audio only after a click or key press, so the intro music starts on the first one.
+function firstGesture(){
+  document.removeEventListener("pointerdown", firstGesture, true);
+  document.removeEventListener("keydown", firstGesture, true);
+  if (!$("introScreen").hidden) startMusic();
+}
+document.addEventListener("pointerdown", firstGesture, true);
+document.addEventListener("keydown", firstGesture, true);
+const CIRC = 2 * Math.PI * 28;
+const $ = id => document.getElementById(id);
+const ring = $("ring");
+ring.style.strokeDasharray = CIRC;
+
+let deck = [], current = null, locked = false, deadline = 0, raf = 0;
+
+function shuffle(a){ a = a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+// Draw without repeats until the whole pool has been used, then reshuffle.
+function draw(){
+  if (!deck.length) deck = shuffle(POOL);
+  const q = deck.pop();
+  return {...q, opts: shuffle([q.a, ...q.w])};
+}
+
+function showIntro(){
+  cancelAnimationFrame(raf);
+  $("quizScreen").hidden = true;
+  $("introScreen").hidden = false;
+  $("showBtn").focus();
+  startMusic();
+}
+
+function showQuestion(){
+  current = draw();
+  locked = false;
+  $("introScreen").hidden = true;
+  $("quizScreen").hidden = false;
+  $("qtopic").textContent = current.t;
+  $("qtext").textContent = current.q;
+  $("verdict").className = "badge"; $("verdict").innerHTML = "";
+  $("nextBtn").hidden = true;
+  const box = $("options"); box.innerHTML = "";
+  current.opts.forEach((o, i) => {
+    const b = document.createElement("button");
+    b.className = "opt"; b.id = "opt" + i;
+    b.innerHTML = `<span class="key">${i+1}</span><span class="txt"></span>`;
+    b.querySelector(".txt").textContent = o;
+    b.addEventListener("click", () => { if (!locked) finish(i); });
+    box.appendChild(b);
+  });
+  startMusic();
+  startTimer();
+}
+
+function startTimer(){
+  cancelAnimationFrame(raf);
+  deadline = performance.now() + SECONDS * 1000;
+  const tick = now => {
+    const left = Math.max(0, deadline - now);
+    $("secs").textContent = Math.ceil(left / 1000);
+    ring.style.strokeDashoffset = CIRC * (1 - left / (SECONDS * 1000));
+    $("timer").classList.toggle("low", left <= 5000);
+    // music accelerates from 112 to 240 BPM, speeding up more toward the end
+    bpm = BASE_BPM + (MAX_BPM - BASE_BPM) * Math.pow(1 - left / (SECONDS * 1000), 1.4);
+    if (left <= 0) { finish(-1); return; }
+    raf = requestAnimationFrame(tick);
+  };
+  raf = requestAnimationFrame(tick);
+}
+
+function finish(i){
+  locked = true;
+  cancelAnimationFrame(raf);
+  stopMusic();
+  const correct = i >= 0 && current.opts[i] === current.a;
+  document.querySelectorAll(".opt").forEach((b, k) => {
+    b.disabled = true;
+    if (k === i) b.classList.add(correct ? "picked-good" : "picked-bad");
+    else b.classList.add("dim");
+  });
+  const v = $("verdict");
+  if (correct){ v.className = "badge good"; v.textContent = "Correct"; playCorrect(); }
+  else { v.className = "badge bad"; v.innerHTML = "Incorrect" + (i < 0 ? "<small>Time's up</small>" : ""); playIncorrect(); }
+  $("nextBtn").hidden = false;
+  $("nextBtn").focus();
+}
+
+$("showBtn").addEventListener("click", () => { audio(); showQuestion(); });
+$("soundBtn").addEventListener("click", () => {
+  soundOn = !soundOn;
+  $("soundBtn").setAttribute("aria-pressed", soundOn ? "true" : "false");
+  $("soundBtn").textContent = soundOn ? "Sound: on" : "Sound: off";
+  if (soundOn) audio();
+});
+$("musicBtn").addEventListener("click", () => {
+  musicOn = !musicOn;
+  $("musicBtn").setAttribute("aria-pressed", musicOn ? "true" : "false");
+  $("musicBtn").textContent = musicOn ? "Music: on" : "Music: off";
+  const inQuestion = !$("quizScreen").hidden && !locked;
+  if (musicOn && (inQuestion || !$("introScreen").hidden)) startMusic();
+  else stopMusic();
+});
+$("nextBtn").addEventListener("click", showIntro);
+
+document.addEventListener("keydown", e => {
+  if (!$("introScreen").hidden){
+    if (e.key === "Enter" && document.activeElement !== $("showBtn") && document.activeElement !== $("soundBtn") && document.activeElement !== $("musicBtn")){ e.preventDefault(); audio(); showQuestion(); }
+    return;
+  }
+  if (!locked && /^[1-4]$/.test(e.key)) $("opt" + (+e.key - 1)).click();
+});
+</script>
+
+</body></html>
