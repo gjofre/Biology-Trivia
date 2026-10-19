@@ -102,6 +102,8 @@ body{
 .btn:hover{filter:brightness(1.08)}
 .btn:focus-visible{outline:3px solid var(--agar); outline-offset:2px}
 .btn.big{font-size:18px; padding:16px 32px}
+.btn.ghost{background:transparent; color:var(--accent); border:1.5px solid var(--accent); padding:12px 22px}
+.btn.ghost:hover{background:var(--accent-soft); filter:none}
 
 .hint{font-size:13px; color:var(--muted); margin:0}
 .foot{display:flex; justify-content:center; align-items:center; gap:16px; flex-wrap:wrap}
@@ -121,6 +123,7 @@ body{
     <h1>Test your <em>Biology</em> knowledge…</h1>
     <p class="sub">with some sports trivia</p>
     <p class="rule">You will have <b>30 seconds</b> once the question appears.</p>
+    <p class="rule">You have the opportunity to skip <b>1 question</b>.</p>
     <p class="ask">Ready to see your question?</p>
     <button class="btn big" id="showBtn">Show my question</button>
   </section>
@@ -141,6 +144,7 @@ body{
     <div class="options" id="options"></div>
     <div class="verdict">
       <div class="badge" id="verdict" role="status" aria-live="polite"></div>
+      <button class="btn ghost" id="skipBtn">Skip this question</button>
       <button class="btn" id="nextBtn" hidden>Next student</button>
     </div>
   </section>
@@ -158,7 +162,7 @@ const POOL = [
   {t:"Molecular genetics", q:"Okazaki fragments are formed during replication of which strand?", a:"The lagging strand", w:["The leading strand","The template strand only during transcription","Both strands equally"]},
   {t:"Molecular genetics", q:"How many of the 64 codons in the standard genetic code are stop codons?", a:"3", w:["1","4","61"]},
   {t:"Molecular genetics", q:"During translation, which ribosomal site holds the tRNA carrying the growing polypeptide chain?", a:"P site", w:["A site","E site","Termination factor"]},
-  {t:"Molecular genetics", q:"In E. coli, the lac operon is transcribed at its highest level when:", a:"Lactose is present and glucose is absent", w:["Glucose is present and lactose is absent","Both glucose and lactose are present","Both glucose and lactose are absent"]},
+  {t:"Molecular genetics", q:"A section of the DNA template strand reads 3′-AGC-5′. What is the sequence of the newly synthesized daughter strand?", a:"5′-TCG-3′", w:["3′-TCG-5′","5′-UCG-3′","5′-AGC-3′"]},
   {t:"Molecular genetics", q:"Why does a G–C base pair contribute more to DNA duplex stability than an A–T pair?", a:"It forms three hydrogen bonds instead of two", w:["It forms covalent bonds across the helix","Guanine and cytosine are both purines","It forms two hydrogen bonds instead of one"]},
   {t:"Biotechnology", q:"Why is Taq polymerase used in PCR?", a:"It remains active through repeated high-temperature denaturation steps", w:["It does not require a primer to begin synthesis","It synthesizes DNA in the 3′ to 5′ direction","It has the highest proofreading accuracy of any polymerase"]},
   {t:"Biotechnology", q:"In CRISPR-Cas9 genome editing, what determines where Cas9 cuts the DNA?", a:"A guide RNA complementary to the target sequence", w:["A restriction site palindrome","A zinc-finger DNA-binding domain","The nearest promoter sequence"]},
@@ -304,6 +308,7 @@ const ring = $("ring");
 ring.style.strokeDasharray = CIRC;
 
 let deck = [], current = null, locked = false, deadline = 0, raf = 0;
+let skipUsed = false; // each student gets one skip
 
 function shuffle(a){ a = a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 
@@ -319,6 +324,7 @@ function showIntro(){
   $("quizScreen").hidden = true;
   $("introScreen").hidden = false;
   $("showBtn").focus();
+  skipUsed = false;
   startMusic();
 }
 
@@ -331,6 +337,7 @@ function showQuestion(){
   $("qtext").textContent = current.q;
   $("verdict").className = "badge"; $("verdict").innerHTML = "";
   $("nextBtn").hidden = true;
+  $("skipBtn").hidden = skipUsed;
   const box = $("options"); box.innerHTML = "";
   current.opts.forEach((o, i) => {
     const b = document.createElement("button");
@@ -364,6 +371,7 @@ function finish(i){
   locked = true;
   cancelAnimationFrame(raf);
   stopMusic();
+  $("skipBtn").hidden = true;
   const correct = i >= 0 && current.opts[i] === current.a;
   document.querySelectorAll(".opt").forEach((b, k) => {
     b.disabled = true;
@@ -393,6 +401,11 @@ $("musicBtn").addEventListener("click", () => {
   else stopMusic();
 });
 $("nextBtn").addEventListener("click", showIntro);
+$("skipBtn").addEventListener("click", () => {
+  if (locked || skipUsed) return;
+  skipUsed = true;
+  showQuestion(); // new question with a fresh 30-second timer
+});
 
 document.addEventListener("keydown", e => {
   if (!$("introScreen").hidden){
